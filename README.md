@@ -269,7 +269,7 @@ Additional discovery and evidence components will be added as the implementation
 ### 1. Clone the Repository
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone <https://github.com/fiona-oc/computer-use-automation.git>
 cd computer-use-automation
 ```
 
