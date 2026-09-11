@@ -24,6 +24,12 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+ALLOWED_ACTIONS = {
+    "fill",
+    "click",
+    "done"
+}
+
 class AgentAction(BaseModel):
     action: Literal[
         "fill",
@@ -115,6 +121,9 @@ def decide_next_action(goal, observation):
     return response.output_parsed
 
 def execute_agent_action(driver, action):
+
+    validate_agent_action(action)
+    
     if action.action == "fill":
         element = driver.find_element(
             By.ID,
@@ -215,7 +224,33 @@ def build_artifact(discovered_steps):
 
     return artifact
 
+def validate_agent_action(action):
+    if action.action not in ALLOWED_ACTIONS:
+        raise ValueError(
+            f"Action '{action.action}' is not allowed."
+        )
 
+    if action.action in {"fill", "click"} and not action.target_id:
+        raise ValueError(
+            f"Action '{action.action}' requires a target_id."
+        )
+
+def redact_text(text, sensitive_values):
+    if text is None:
+        return None
+
+    redacted = text
+
+    for value in sensitive_values:
+        if value is not None:
+            redacted = redacted.replace(
+                str(value),
+                "[REDACTED]"
+            )
+
+    return redacted
+
+    
 if __name__ == "__main__":
 
     run_id = str(uuid.uuid4())
@@ -225,16 +260,22 @@ if __name__ == "__main__":
 
     driver = webdriver.Chrome()
 
-    goal = """
-    Open a savings sub-account for member 12345.
+    member_id = "12345"
+    goal = f"""
+    Open a savings sub-account for member {member_id}.
     """
 
     discovered_steps = []
 
+    safe_goal = redact_text(
+        goal.strip(),
+        [member_id]
+    )
+
     log_event(log_path, {
         "run_id": run_id,
         "event": "run_start",
-        "goal": goal.strip()
+        "goal": safe_goal
     })
 
     try:
@@ -252,14 +293,25 @@ if __name__ == "__main__":
             print(f"\nSTEP {step_number + 1}")
             print(action.model_dump())
 
+            safe_value = (
+                "[REDACTED]"
+                if action.action == "fill"
+                else action.value
+            )
+
+            safe_reason = redact_text(
+                action.reason,
+                ["12345"]
+            )
+            
             log_event(log_path, {
                 "run_id": run_id,
                 "event": "agent_decision",
                 "step_number": step_number + 1,
                 "action": action.action,
                 "target_id": action.target_id,
-                "value": action.value,
-                "reason": action.reason
+                "value": safe_value,
+                "reason": safe_reason
             })
             
 

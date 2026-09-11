@@ -1,26 +1,58 @@
 # Computer-Use Automation System
 
-A prototype computer-use automation system that discovers and replays workflows against a web UI.
+An LLM-driven computer-use agent that discovers browser workflows and converts them into typed artifacts for deterministic replay.
 
-The system is designed around two execution modes:
+<p align="center">
+  <img src="docs/member-details.png" width="48%">
+  <img src="docs/open-account.png" width="48%">
+</p>
 
-1. **Discovery** — an LLM-driven agent observes a UI, decides what action to take, and executes actions until the goal is reached.
-2. **Replay** — a successful workflow is stored as a typed, versioned artifact and replayed deterministically without requiring LLM decisions.
+<p align="center">
+  <strong>LLM Discovery → Typed Artifact → Deterministic Replay → Human Handoff</strong>
+</p>
 
-> **Project Status:** Work in progress. Deterministic replay is implemented. LLM-driven discovery, observability, safety controls, and human-in-the-loop handoff are currently being added.
+## Overview
 
----
+This project demonstrates a complete automation lifecycle:
 
-## Current Demo
+- an LLM discovers a workflow against a live UI,
+- the workflow is saved as a typed, versioned artifact,
+- the artifact replays deterministically without LLM decisions,
+- failures can escalate to a human while preserving the live browser session.
 
-The project includes a local Django banking application used as the target UI.
+## Architecture
 
-The current workflow is:
+```text
+Natural-Language Goal
+        |
+        v
++-----------------------+
+| LLM Discovery Agent   |
+| observe -> decide     |
+| -> act                |
++-----------------------+
+        |
+        v
++-----------------------+
+| Typed Pydantic        |
+| Workflow Artifact     |
++-----------------------+
+        |
+        v
++-----------------------+
+| Deterministic Replay  |
+| No LLM decisions      |
++-----------------------+
+        |
+        +----> Structured Logs
+        +----> Failure Evidence
+        +----> Human Handoff
+```
+
+The demo workflow uses a local Django banking application:
 
 ```text
 Search Member
-    ↓
-Member Details
     ↓
 Open Sub-account
     ↓
@@ -28,109 +60,192 @@ Select Savings
     ↓
 Continue
     ↓
-Confirmation
+Verify Confirmation
 ```
 
-For example:
+## Key Features
+
+- LLM-driven observe → decide → act discovery loop
+- Structured LLM actions
+- Typed and versioned Pydantic workflow artifacts
+- Runtime input parameterization
+- Deterministic Selenium replay without LLM decisions
+- Explicit success-condition verification
+- Business outcome / recoverable error / hard failure distinction
+- Bounded retries
+- Domain and action allowlists
+- Sensitive-data redaction in logs
+- Structured JSONL execution logs
+- Failure screenshots
+- Human takeover of the same live Selenium session
+- Minimal Django Operator Console
+
+## Project Structure
 
 ```text
-Member ID: 12345
+computer-use-automation/
+├── manage.py
+├── requirements.txt
+├── README.md
+├── REPORT.md
+│
+├── demo_bank/
+│
+├── bank/
+│   └── templates/
+│       └── bank/
+│           ├── base.html
+│           ├── search_member.html
+│           ├── member_detail.html
+│           ├── open_account.html
+│           ├── confirmation.html
+│           ├── member_not_found.html
+│           └── operator_console.html
+│
+├── automation/
+│   ├── artifact.py
+│   ├── discovery.py
+│   ├── replay.py
+│   ├── handoff_state.py
+│   └── selenium_demo.py
+│
+├── artifacts/
+│   ├── open_savings_account.json
+│   └── discovered_open_savings_account.json
+│
+└── evidence/
+    ├── discovery_log.jsonl
+    ├── replay_log.jsonl
+    ├── discovered_open_savings_account.json
+    ├── handoff_state.json
+    └── failures/
 ```
 
-produces a successful account-opening workflow.
+## Setup
 
-An invalid member such as:
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/fiona-oc/computer-use-automation.git
+cd computer-use-automation
+```
+
+### 2. Create a virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+On Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure the OpenAI API key
+
+Create a `.env` file in the project root:
 
 ```text
-Member ID: 99999
+OPENAI_API_KEY=your_api_key_here
 ```
 
-produces a known business outcome:
+The API key is required for discovery only. Deterministic replay does not call the LLM.
+
+Do not commit `.env`.
+
+## Run the Demo
+
+Two terminal windows are useful for the demo.
+
+### Terminal 1 — Start the Demo Bank
+
+Activate the virtual environment and run:
+
+```bash
+python manage.py runserver
+```
+
+The application will be available at:
 
 ```text
-Member Not Found
+http://127.0.0.1:8000/
 ```
 
-This is treated differently from a technical automation failure.
-
----
-
-## Architecture
-
-The current deterministic replay architecture is:
+The Operator Console is available at:
 
 ```text
-                 Runtime Inputs
-                {"member_id": ...}
-                        │
-                        ▼
-              Workflow Artifact
-                    (JSON)
-                        │
-                        ▼
-               Pydantic Validation
-                        │
-                        ▼
-               Generic Replay Engine
-                        │
-                        ▼
-                    Selenium
-                        │
-                        ▼
-                  Django Web UI
-                        │
-                        ▼
-             Success / Business Outcome
+http://127.0.0.1:8000/operator/
 ```
 
-The workflow definition is intentionally separated from the execution engine.
+### Terminal 2 — Run LLM Discovery
 
-The replay engine does not contain application-specific workflow decisions. Instead, it interprets actions defined in the saved artifact.
+With the Django server running:
 
-For example:
+```bash
+python automation/discovery.py
+```
+
+The discovery agent is given the goal:
+
+```text
+Open a savings sub-account for member 12345.
+```
+
+It observes the live UI and chooses browser actions until the goal is complete.
+
+A successful run produces a reusable artifact at:
+
+```text
+artifacts/discovered_open_savings_account.json
+```
+
+Discovery evidence is written to:
+
+```text
+evidence/discovery_log.jsonl
+```
+
+## Deterministic Replay
+
+Replay the discovered artifact using a different member:
+
+```bash
+python automation/replay.py \
+  --artifact artifacts/discovered_open_savings_account.json \
+  --member-id 67890
+```
+
+Replay executes the saved artifact directly. It does **not** invoke the LLM.
+
+A successful result should include:
+
+```text
+status: success
+```
+
+and the account-creation confirmation output.
+
+Replay events are recorded in:
+
+```text
+evidence/replay_log.jsonl
+```
+
+## Artifact Example
+
+A discovered step is represented as structured data:
 
 ```json
 {
-  "id": "search_member",
-  "action": "click",
-  "locator": {
-    "strategy": "id",
-    "value": "search-button"
-  }
-}
-```
-
-is interpreted by the generic replay engine and executed through Selenium.
-
----
-
-## Structured Workflow Artifact
-
-A reusable workflow is stored as a typed, versioned JSON artifact.
-
-Example:
-
-```text
-artifacts/open_savings_account.json
-```
-
-The artifact contains:
-
-- Workflow name and version
-- Typed input parameters
-- Ordered actions
-- Element locators
-- Runtime parameter references
-- Typed outputs
-- Success conditions
-
-Runtime values are parameterized instead of hard-coded.
-
-For example:
-
-```json
-{
-  "id": "enter_member_id",
+  "id": "step_1",
   "action": "fill",
   "locator": {
     "strategy": "id",
@@ -140,421 +255,113 @@ For example:
 }
 ```
 
-This allows the same workflow artifact to be reused with different members.
-
----
-
-## Artifact Validation
-
-Artifacts are validated with Pydantic before replay.
-
-For example, supported actions are currently:
+The member used during discovery is converted into the runtime parameter:
 
 ```text
-navigate
-fill
-click
-extract
+{{member_id}}
 ```
 
-An invalid action such as:
+This allows one discovered workflow to be reused with different inputs.
+
+## Error Handling
+
+Replay distinguishes between four result categories:
+
+```text
+success
+business_outcome
+recoverable_error
+hard_failure
+```
+
+For example, searching for a member that does not exist is an expected business outcome rather than an automation crash.
+
+UI steps use explicit waits and bounded retries. Unexpected failures are logged with contextual information.
+
+## Human-in-the-Loop Demo
+
+Human handoff can be demonstrated by intentionally making one artifact locator invalid.
+
+For example, temporarily change:
 
 ```json
-{
-  "action": "dance"
-}
+"value": "open-account-button"
 ```
 
-is rejected during schema validation rather than being passed to the browser automation layer.
+to:
 
-This provides a validation boundary between generated workflow definitions and deterministic execution.
+```json
+"value": "fake-button"
+```
 
----
+Then run replay.
 
-## Replay Outcomes
+The executor retries the failed step. After the retry limit is reached, automation pauses and records the handoff state.
 
-The replay system distinguishes between different execution outcomes.
-
-### Success
-
-The workflow reaches its expected success condition.
+Open:
 
 ```text
-status = success
+http://127.0.0.1:8000/operator/
 ```
 
-### Business Outcome
+The Operator Console displays the failed step and current browser state.
 
-The application returns a valid business result that prevents the requested workflow from continuing.
+Complete the blocked action manually in the **same Selenium-controlled Chrome session**. Return to the replay process and confirm that the intervention succeeded.
 
-Example:
+Replay then continues from the next artifact step.
+
+Restore the locator to `open-account-button` after the test.
+
+## Safety
+
+The prototype applies safety controls outside the LLM decision process.
+
+Current controls include:
+
+- navigation host allowlisting
+- action allowlisting
+- typed artifact validation
+- bounded discovery steps
+- bounded replay retries
+- sensitive-value redaction
+- failure evidence and structured audit logs
+
+Sensitive runtime values are replaced with:
 
 ```text
-Member Not Found
+[REDACTED]
 ```
 
-returns:
+before logs are persisted.
 
-```text
-status = business_outcome
-```
-
-This is not considered an automation failure.
-
-### Recoverable Error
-
-A temporary technical condition prevents a step from completing, such as an element timeout or slow page load.
-
-The replay engine retries eligible operations before returning:
-
-```text
-status = recoverable_error
-```
-
-### Hard Failure
-
-Unexpected or non-recoverable execution problems are classified separately:
-
-```text
-status = hard_failure
-```
-
----
-
-## Tech Stack
-
-- Python
-- Django
-- Selenium
-- Pydantic
-- Bootstrap
-
----
-
-## Project Structure
-
-```text
-computer-use-automation/
-│
-├── automation/
-│   ├── artifact.py
-│   ├── replay.py
-│   └── selenium_demo.py
-│
-├── artifacts/
-│   └── open_savings_account.json
-│
-├── bank/
-│   ├── templates/
-│   │   └── bank/
-│   ├── urls.py
-│   └── views.py
-│
-├── demo_bank/
-│
-├── evidence/
-│
-├── manage.py
-├── requirements.txt
-├── .gitignore
-└── README.md
-```
-
-Additional discovery and evidence components will be added as the implementation progresses.
-
----
-
-## Setup
-
-### 1. Clone the Repository
-
-```bash
-git clone <https://github.com/fiona-oc/computer-use-automation.git>
-cd computer-use-automation
-```
-
-### 2. Create a Virtual Environment
-
-macOS/Linux:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-Windows:
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Run the Demo Application
-
-Start the Django development server:
-
-```bash
-python manage.py runserver
-```
-
-The demo application will be available at:
-
-```text
-http://127.0.0.1:8000
-```
-
-Keep this terminal running while executing the automation.
-
----
-
-## Run Deterministic Replay
-
-Open another terminal and activate the virtual environment:
-
-```bash
-source venv/bin/activate
-```
-
-Run the saved workflow:
-
-```bash
-python automation/replay.py --member-id 12345
-```
-
-The replay engine will:
-
-```text
-Load workflow artifact
-        ↓
-Validate artifact
-        ↓
-Resolve runtime parameters
-        ↓
-Execute Selenium actions
-        ↓
-Verify success condition
-        ↓
-Extract outputs
-        ↓
-Return structured ReplayResult
-```
-
-A successful run should produce output similar to:
-
-```text
-Running step: open_member_search
-Running step: enter_member_id
-Running step: search_member
-Running step: open_sub_account
-Running step: select_savings
-Running step: continue
-
-{
-    'status': 'success',
-    'message': 'Replay completed successfully.',
-    'outputs': {
-        'confirmation_message': 'Account created successfully'
-    }
-}
-```
-
----
-
-## Test Members
-
-The demo application currently includes the following test members:
-
-| Member ID | Expected Result |
-|---|---|
-| `12345` | Valid member |
-| `67890` | Valid member |
-| `99999` | Member Not Found |
-
-For example:
-
-```bash
-python automation/replay.py --member-id 67890
-```
-
-should replay the same saved capability using a different runtime input.
-
-To test the business-outcome path:
-
-```bash
-python automation/replay.py --member-id 99999
-```
-
-The system should classify the result as:
-
-```text
-business_outcome
-```
-
-rather than treating it as an unexpected automation failure.
-
----
-
-## Design Principles
-
-### Artifact / Runtime Separation
-
-Workflow knowledge lives in the artifact rather than being hard-coded into the replay engine.
-
-```text
-Artifact
-"What should be done?"
-
-        ↓
-
-Replay Engine
-"How do I execute these instructions?"
-
-        ↓
-
-Selenium
-"Perform the browser interaction."
-```
-
-### Parameterized Capabilities
-
-Runtime values such as member IDs are supplied separately from the saved workflow:
-
-```text
-Artifact:
-{{member_id}}
-
-Runtime:
-12345
-```
-
-This allows one discovered capability to be reused across multiple executions.
-
-### Deterministic Replay
-
-Once a workflow has been discovered and saved, replay follows the artifact directly.
-
-The replay engine does not require an LLM to decide the next UI action.
-
-### Explicit Outcome Classification
-
-Business outcomes are separated from technical failures so that expected application behavior is not incorrectly reported as an automation failure.
-
----
-
-## Roadmap
-
-### Completed
-
-- [x] Django target application
-- [x] Selenium browser automation
-- [x] Stable UI element identifiers
-- [x] Typed workflow schema
-- [x] Pydantic artifact validation
-- [x] Versioned JSON workflow artifact
-- [x] Parameterized runtime inputs
-- [x] Generic deterministic replay engine
-- [x] Success-condition verification
-- [x] Typed replay results
-- [x] Business-outcome handling
-- [x] Basic retry/error classification
-
-### In Progress
-
-- [ ] LLM-driven workflow discovery
-- [ ] Observe → decide → act agent loop
-- [ ] Automatic artifact generation from successful discovery
-- [ ] Structured execution logs
-- [ ] Failure screenshots and evidence
-- [ ] Domain/action allowlists
-- [ ] Sensitive-data redaction
-- [ ] Human-in-the-loop pause and resume
-- [ ] Discovery and replay evidence
-- [ ] Final project report
-
----
-
-## Planned Discovery Architecture
-
-The completed system will extend the current replay architecture with an LLM-driven discovery phase:
-
-```text
-                 User Goal
-                    │
-                    ▼
-              Discovery Agent
-                    │
-          ┌─────────┴─────────┐
-          │                   │
-       Observe              Decide
-          │                   │
-          └─────────┬─────────┘
-                    ▼
-                   Act
-                    │
-                    ▼
-                 Selenium
-                    │
-                    ▼
-                  Web UI
-                    │
-                    ▼
-              Goal Reached?
-               │         │
-              No        Yes
-               │         │
-               └── loop  ▼
-                   Generate
-                    Artifact
-                       │
-                       ▼
-                Pydantic Validate
-                       │
-                       ▼
-                Save Capability
-                       │
-                       ▼
-             Deterministic Replay
-```
-
-The LLM is responsible for discovering a workflow.
-
-Once the workflow has been successfully discovered and converted into a validated artifact, future executions use deterministic replay rather than asking the LLM to make the same decisions again.
-
----
+The prototype intentionally does not execute real financial or irreversible actions.
 
 ## Evidence
 
-Discovery and replay evidence will be stored under:
+Example end-to-end evidence is stored under:
 
 ```text
-evidence/
+/evidence/
 ```
 
-Planned evidence includes:
+It contains:
 
-```text
-evidence/
-├── discovery_log.jsonl
-├── replay_log.jsonl
-├── discovery_screenshot.png
-├── replay_screenshot.png
-└── open_savings_account.json
-```
+- a generated workflow artifact
+- discovery logs
+- deterministic replay logs
+- human-handoff state
+- representative failure evidence
 
-This will make successful discovery and deterministic replay independently inspectable.
+These demonstrate the complete path from LLM-driven discovery to deterministic reuse.
 
----
+## Design Decisions and Trade-offs
 
-## Development Status
+See [`REPORT.md`](REPORT.md) for the detailed discussion of:
 
-This repository is being developed as a focused vertical slice of a computer-use automation system.
-
-The current implementation demonstrates the structured artifact and deterministic replay path. The next major component is LLM-driven discovery, followed by safety controls, observability, and human-in-the-loop recovery.
+- architecture
+- artifact schema
+- deterministic replay and error handling
+- heterogeneous surfaces and multi-tenant reuse
+- escalation and human handoff
+- safety
+- deliberate cuts and next steps

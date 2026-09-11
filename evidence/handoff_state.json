@@ -1,0 +1,7 @@
+{
+  "status": "PAUSED",
+  "current_step": "step_3",
+  "reason": "Automation could not complete this step after retries.",
+  "current_url": "http://127.0.0.1:8000/member/67890/",
+  "timestamp": "2026-09-11T23:03:29.751399+00:00"
+}

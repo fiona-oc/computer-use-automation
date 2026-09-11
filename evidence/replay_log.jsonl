@@ -1,24 +1,30 @@
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "run_start", "artifact": "artifacts/discovered_open_savings_account.json", "inputs": {"member_id": "67890"}, "timestamp": "2026-09-11T06:54:01.360710+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_start", "step_id": "open_member_search", "action": "navigate", "timestamp": "2026-09-11T06:54:09.163635+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_success", "step_id": "open_member_search", "timestamp": "2026-09-11T06:54:09.721994+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_start", "step_id": "step_1", "action": "fill", "timestamp": "2026-09-11T06:54:09.722222+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_success", "step_id": "step_1", "timestamp": "2026-09-11T06:54:10.686059+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_start", "step_id": "step_2", "action": "click", "timestamp": "2026-09-11T06:54:10.686263+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_success", "step_id": "step_2", "timestamp": "2026-09-11T06:54:11.408751+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_start", "step_id": "step_3", "action": "click", "timestamp": "2026-09-11T06:54:11.409002+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_success", "step_id": "step_3", "timestamp": "2026-09-11T06:54:11.921178+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_start", "step_id": "step_4", "action": "click", "timestamp": "2026-09-11T06:54:11.921540+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_success", "step_id": "step_4", "timestamp": "2026-09-11T06:54:12.218853+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_start", "step_id": "step_5", "action": "click", "timestamp": "2026-09-11T06:54:12.219020+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "step_success", "step_id": "step_5", "timestamp": "2026-09-11T06:54:12.350466+00:00"}
-{"run_id": "b19009f6-fcc1-4099-a8b7-46acd3f1f055", "event": "run_complete", "status": "success", "outputs": {"confirmation_message": "Account created successfully!"}, "timestamp": "2026-09-11T06:54:12.558733+00:00"}
-{"run_id": "f4f3a7bf-754e-40c4-afa5-4094e0ee6749", "event": "run_start", "artifact": "artifacts/discovered_open_savings_account.json", "inputs": {"member_id": "67890"}, "timestamp": "2026-09-11T07:06:01.854513+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "run_start", "artifact": "artifacts/discovered_open_savings_account.json", "inputs": {"member_id": "67890"}, "timestamp": "2026-09-11T07:06:21.741365+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "step_start", "step_id": "open_member_search", "action": "navigate", "timestamp": "2026-09-11T07:06:28.086428+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "step_success", "step_id": "open_member_search", "timestamp": "2026-09-11T07:06:28.660698+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "step_start", "step_id": "step_1", "action": "fill", "timestamp": "2026-09-11T07:06:28.660860+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "step_success", "step_id": "step_1", "timestamp": "2026-09-11T07:06:29.483428+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "step_start", "step_id": "step_2", "action": "click", "timestamp": "2026-09-11T07:06:29.483594+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "step_success", "step_id": "step_2", "timestamp": "2026-09-11T07:06:30.179679+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "step_start", "step_id": "step_3", "action": "click", "timestamp": "2026-09-11T07:06:30.179900+00:00"}
-{"run_id": "cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a", "event": "step_failed", "step_id": "step_3", "status": "recoverable_error", "message": "Step 'step_3' timed out after 3 attempts.", "current_url": "http://127.0.0.1:8000/member/67890/", "screenshot": "evidence/failures/cb55b21b-9cdf-40cb-90e8-0c04c65d1a2a_step_3.png", "timestamp": "2026-09-11T07:07:01.623914+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "run_start", "artifact": "artifacts/discovered_open_savings_account.json", "inputs": {"member_id": "[REDACTED]"}, "timestamp": "2026-09-11T22:53:40.098868+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_start", "step_id": "open_member_search", "action": "navigate", "timestamp": "2026-09-11T22:53:46.022621+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_success", "step_id": "open_member_search", "timestamp": "2026-09-11T22:53:46.549641+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_start", "step_id": "step_1", "action": "fill", "timestamp": "2026-09-11T22:53:46.549808+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_success", "step_id": "step_1", "timestamp": "2026-09-11T22:53:47.412393+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_start", "step_id": "step_2", "action": "click", "timestamp": "2026-09-11T22:53:47.412552+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_success", "step_id": "step_2", "timestamp": "2026-09-11T22:53:48.098527+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_start", "step_id": "step_3", "action": "click", "timestamp": "2026-09-11T22:53:48.098736+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_success", "step_id": "step_3", "timestamp": "2026-09-11T22:53:48.631641+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_start", "step_id": "step_4", "action": "click", "timestamp": "2026-09-11T22:53:48.631915+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_success", "step_id": "step_4", "timestamp": "2026-09-11T22:53:48.907829+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_start", "step_id": "step_5", "action": "click", "timestamp": "2026-09-11T22:53:48.908012+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "step_success", "step_id": "step_5", "timestamp": "2026-09-11T22:53:49.039273+00:00"}
+{"run_id": "4a863f8f-f073-4ae5-92d6-f81563a52dfc", "event": "run_complete", "status": "success", "outputs": {"confirmation_message": "Account created successfully!"}, "timestamp": "2026-09-11T22:53:49.238514+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "run_start", "artifact": "artifacts/discovered_open_savings_account.json", "inputs": {"member_id": "[REDACTED]"}, "timestamp": "2026-09-11T23:02:50.867579+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_start", "step_id": "open_member_search", "action": "navigate", "timestamp": "2026-09-11T23:02:56.943478+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_success", "step_id": "open_member_search", "timestamp": "2026-09-11T23:02:57.493607+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_start", "step_id": "step_1", "action": "fill", "timestamp": "2026-09-11T23:02:57.493899+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_success", "step_id": "step_1", "timestamp": "2026-09-11T23:02:58.315355+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_start", "step_id": "step_2", "action": "click", "timestamp": "2026-09-11T23:02:58.315535+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_success", "step_id": "step_2", "timestamp": "2026-09-11T23:02:59.050794+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_start", "step_id": "step_3", "action": "click", "timestamp": "2026-09-11T23:02:59.050993+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "human_handoff_started", "step_id": "step_3", "reason": "Automation could not complete this step after retries.", "current_url": "http://127.0.0.1:8000/member/67890/", "timestamp": "2026-09-11T23:03:29.755814+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "human_handoff_completed", "step_id": "step_3", "timestamp": "2026-09-11T23:03:45.575094+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_success", "step_id": "step_3", "timestamp": "2026-09-11T23:03:45.580783+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_start", "step_id": "step_4", "action": "click", "timestamp": "2026-09-11T23:03:45.581811+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_success", "step_id": "step_4", "timestamp": "2026-09-11T23:03:45.819242+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_start", "step_id": "step_5", "action": "click", "timestamp": "2026-09-11T23:03:45.819424+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "step_success", "step_id": "step_5", "timestamp": "2026-09-11T23:03:45.904954+00:00"}
+{"run_id": "31f50749-a783-4afd-a7b5-509e364e70ee", "event": "run_complete", "status": "success", "outputs": {"confirmation_message": "Account created successfully!"}, "timestamp": "2026-09-11T23:03:46.142164+00:00"}

@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 
+from automation.handoff_state import read_handoff_state
+
 
 MEMBERS = {
     "12345": {
@@ -73,4 +75,14 @@ def open_account(request, member_id):
             "member_id": member_id,
             "member": member,
         }
+    )
+
+
+def operator_console(request):
+    state = read_handoff_state()
+
+    return render(
+        request,
+        "bank/operator_console.html",
+        state
     )

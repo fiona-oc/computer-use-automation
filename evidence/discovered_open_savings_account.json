@@ -1,0 +1,82 @@
+{
+  "name": "open_savings_sub_account",
+  "version": "1.0",
+  "description": "Open a savings sub-account for an existing member.",
+  "inputs": [
+    {
+      "name": "member_id",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "open_member_search",
+      "action": "navigate",
+      "locator": null,
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "id": "step_1",
+      "action": "fill",
+      "locator": {
+        "strategy": "id",
+        "value": "member_id"
+      },
+      "value": "{{member_id}}"
+    },
+    {
+      "id": "step_2",
+      "action": "click",
+      "locator": {
+        "strategy": "id",
+        "value": "search-button"
+      },
+      "value": null
+    },
+    {
+      "id": "step_3",
+      "action": "click",
+      "locator": {
+        "strategy": "id",
+        "value": "open-account-button"
+      },
+      "value": null
+    },
+    {
+      "id": "step_4",
+      "action": "click",
+      "locator": {
+        "strategy": "id",
+        "value": "savings"
+      },
+      "value": null
+    },
+    {
+      "id": "step_5",
+      "action": "click",
+      "locator": {
+        "strategy": "id",
+        "value": "continue-button"
+      },
+      "value": null
+    }
+  ],
+  "outputs": [
+    {
+      "name": "confirmation_message",
+      "type": "string",
+      "locator": {
+        "strategy": "id",
+        "value": "success-message"
+      }
+    }
+  ],
+  "success_condition": {
+    "locator": {
+      "strategy": "id",
+      "value": "success-message"
+    },
+    "contains_text": "Account created successfully"
+  }
+}

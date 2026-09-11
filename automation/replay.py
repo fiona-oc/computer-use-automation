@@ -3,6 +3,7 @@ import argparse
 import os
 import uuid
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
 from artifact import Artifact, ReplayResult
+from handoff_state import write_handoff_state
 
 
 
@@ -22,6 +24,18 @@ LOCATOR_MAP = {
 }
 
 MAX_RETRIES = 2
+
+# Safety Allowlist
+ALLOWED_HOSTS = {
+    "127.0.0.1:8000"
+}
+
+ALLOWED_ACTIONS = {
+    "navigate",
+    "fill",
+    "click",
+    "extract"
+}
 
 
 def log_event(log_path, event):
@@ -54,6 +68,8 @@ def get_element(driver, wait, locator):
 
 def execute_step(driver, wait, step, inputs):
     print(f"Running step: {step.id}")
+
+    validate_step_safety(step)
 
     if step.action == "navigate":
         url = resolve_value(step.value, inputs)
@@ -113,7 +129,9 @@ def execute_step_with_retry(
     driver,
     wait,
     step,
-    inputs
+    inputs,
+    log_path,
+    run_id
 ):
     for attempt in range(MAX_RETRIES + 1):
         try:
@@ -139,11 +157,27 @@ def execute_step_with_retry(
                 )
                 continue
 
+            print(
+                f"Step '{step.id}' failed after "
+                f"{MAX_RETRIES + 1} attempts."
+            )
+
+            # human handoff first
+            resolved = request_human_handoff(
+                driver,
+                step,
+                log_path,
+                run_id
+            )
+
+            if resolved:
+                return None
+
             return ReplayResult(
                 status="recoverable_error",
                 message=(
-                    f"Step '{step.id}' timed out "
-                    f"after {MAX_RETRIES + 1} attempts."
+                    f"Step '{step.id}' could not be completed "
+                    "after retries and human handoff."
                 ),
                 outputs={}
             )
@@ -168,7 +202,10 @@ def run_replay(artifact_path, inputs):
         "run_id": run_id,
         "event": "run_start",
         "artifact": artifact_path,
-        "inputs": inputs
+        "inputs": {
+                key: "[REDACTED]"
+                for key in inputs
+            }
     })
 
     artifact = load_artifact(artifact_path)
@@ -191,7 +228,9 @@ def run_replay(artifact_path, inputs):
                 driver,
                 wait,
                 step,
-                inputs
+                inputs,
+                log_path,
+                run_id
             )
 
             if isinstance(result, ReplayResult):
@@ -278,6 +317,76 @@ def run_replay(artifact_path, inputs):
     finally:
         input("Press Enter to close the browser...")
         driver.quit()
+
+
+def validate_step_safety(step):
+    if step.action not in ALLOWED_ACTIONS:
+        raise ValueError(
+            f"Action '{step.action}' is not allowed."
+        )
+
+    if step.action == "navigate":
+        parsed_url = urlparse(step.value)
+
+        if parsed_url.netloc not in ALLOWED_HOSTS:
+            raise ValueError(
+                f"Navigation to '{parsed_url.netloc}' is not allowed."
+            )
+
+
+def request_human_handoff(driver, step, log_path, run_id):
+    reason = (
+        "Automation could not complete "
+        "this step after retries."
+    )
+
+    write_handoff_state(
+        step_id=step.id,
+        reason=reason,
+        current_url=driver.current_url
+    )
+
+    log_event(log_path, {
+        "run_id": run_id,
+        "event": "human_handoff_started",
+        "step_id": step.id,
+        "reason": reason,
+        "current_url": driver.current_url
+    })
+
+    print("\n" + "=" * 50)
+    print("AUTOMATION PAUSED")
+    print(f"Current step: {step.id}")
+    print(f"Reason: {reason}")
+    print()
+    print("Open the Operator Console:")
+    print("http://127.0.0.1:8000/operator/")
+    print()
+    print("Complete this step manually in the browser.")
+    print("Then return here and press ENTER.")
+    print("=" * 50)
+
+    response = input(
+        "Was the step completed successfully? (y/n): "
+        ).strip().lower()
+
+    if response == "y":
+        log_event(log_path, {
+            "run_id": run_id,
+            "event": "human_handoff_completed",
+            "step_id": step.id
+        })
+
+        print("Human handoff complete. Resuming automation...\n")
+        return True
+
+    log_event(log_path, {
+        "run_id": run_id,
+        "event": "human_handoff_failed",
+        "step_id": step.id
+    })
+
+    return False
 
 
 if __name__ == "__main__":
