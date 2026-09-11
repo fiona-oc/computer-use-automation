@@ -1,4 +1,8 @@
 import json
+import argparse
+import os
+import uuid
+from datetime import datetime, timezone
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -7,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
 from artifact import Artifact, ReplayResult
-import argparse
+
 
 
 LOCATOR_MAP = {
@@ -18,6 +22,13 @@ LOCATOR_MAP = {
 }
 
 MAX_RETRIES = 2
+
+
+def log_event(log_path, event):
+    event["timestamp"] = datetime.now(timezone.utc).isoformat()
+
+    with open(log_path, "a") as f:
+        f.write(json.dumps(event) + "\n")
 
 
 def resolve_value(value, inputs):
@@ -146,6 +157,20 @@ def load_artifact(path):
 
 
 def run_replay(artifact_path, inputs):
+
+    run_id = str(uuid.uuid4())
+
+    os.makedirs("evidence", exist_ok=True)
+    os.makedirs("evidence/failures", exist_ok=True)
+    log_path = "evidence/replay_log.jsonl"
+
+    log_event(log_path, {
+        "run_id": run_id,
+        "event": "run_start",
+        "artifact": artifact_path,
+        "inputs": inputs
+    })
+
     artifact = load_artifact(artifact_path)
 
     driver = webdriver.Chrome()
@@ -155,6 +180,13 @@ def run_replay(artifact_path, inputs):
 
     try:
         for step in artifact.steps:
+            log_event(log_path, {
+                "run_id": run_id,
+                "event": "step_start",
+                "step_id": step.id,
+                "action": step.action
+            })
+            
             result = execute_step_with_retry(
                 driver,
                 wait,
@@ -163,8 +195,31 @@ def run_replay(artifact_path, inputs):
             )
 
             if isinstance(result, ReplayResult):
+
+                screenshot_path = (
+                    f"evidence/failures/"
+                    f"{run_id}_{step.id}.png"
+                )
+                driver.save_screenshot(screenshot_path)
+
+                log_event(log_path, {
+                    "run_id": run_id,
+                    "event": "step_failed",
+                    "step_id": step.id,
+                    "status": result.status,
+                    "message": result.message,
+                    "current_url": driver.current_url,
+                    "screenshot": screenshot_path
+                })
+                
                 print(result.model_dump())
                 return result
+
+            log_event(log_path, {
+                "run_id": run_id,
+                "event": "step_success",
+                "step_id": step.id
+            })
 
             if step.action == "extract":
                 outputs[step.id] = result
@@ -198,6 +253,13 @@ def run_replay(artifact_path, inputs):
             message="Replay completed successfully.",
             outputs=outputs
         )
+
+        log_event(log_path, {
+            "run_id": run_id,
+            "event": "run_complete",
+            "status": result.status,
+            "outputs": result.outputs
+        })
 
         print(result.model_dump())
 
