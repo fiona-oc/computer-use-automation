@@ -1,0 +1,146 @@
+{% extends "bank/base.html" %}
+
+{% block title %}
+Open Sub-account
+{% endblock %}
+
+{% block content %}
+
+<section class="hero hero-small">
+
+    <div class="container">
+
+        <p class="mb-2 opacity-75">
+            Members / {{ member_id }} / Open Sub-account
+        </p>
+
+        <h1>
+            Open Sub-account
+        </h1>
+
+        <p class="mb-0">
+            Select the type of account to open for
+            {{ member.name }}.
+        </p>
+
+    </div>
+
+</section>
+
+<div class="container">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card content-card overlap-card">
+
+                <div class="card-body p-4 p-md-5">
+
+                    <h4 class="mb-4">
+                        Choose Account Type
+                    </h4>
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        <label
+                            class="
+                                account-option
+                                d-flex
+                                align-items-center
+                                mb-3
+                                w-100
+                            "
+                            for="savings"
+                        >
+
+                            <input
+                                class="form-check-input me-3"
+                                type="radio"
+                                name="account_type"
+                                id="savings"
+                                value="savings"
+                                required
+                            >
+
+                            <div>
+
+                                <div class="fw-bold">
+                                    Savings Account
+                                </div>
+
+                                <small class="text-muted">
+                                    Earn interest on your savings
+                                </small>
+
+                            </div>
+
+                        </label>
+
+                        <label
+                            class="
+                                account-option
+                                d-flex
+                                align-items-center
+                                mb-4
+                                w-100
+                            "
+                            for="checking"
+                        >
+
+                            <input
+                                class="form-check-input me-3"
+                                type="radio"
+                                name="account_type"
+                                id="checking"
+                                value="checking"
+                            >
+
+                            <div>
+
+                                <div class="fw-bold">
+                                    Checking Account
+                                </div>
+
+                                <small class="text-muted">
+                                    For everyday banking
+                                </small>
+
+                            </div>
+
+                        </label>
+
+                        <div class="d-flex justify-content-between gap-3">
+
+                            <a
+                                href="{% url 'member_detail' member_id %}"
+                                class="btn btn-outline-bank action-button"
+                            >
+                                Back
+                            </a>
+
+                            <button
+                                type="submit"
+                                class="btn btn-bank action-button"
+                                id="continue-button"
+                            >
+                                Continue
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

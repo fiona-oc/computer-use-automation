@@ -1,0 +1,88 @@
+{% extends "bank/base.html" %}
+
+{% block title %}
+Member Not Found
+{% endblock %}
+
+{% block content %}
+
+<section class="hero hero-small">
+
+    <div class="container">
+
+        <p class="mb-2 opacity-75">
+            Members / {{ member_id }}
+        </p>
+
+        <h1>
+            Member Search
+        </h1>
+
+    </div>
+
+</section>
+
+<div class="container">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-6">
+
+            <div
+                class="
+                    card
+                    content-card
+                    overlap-card
+                    text-center
+                "
+            >
+
+                <div class="card-body p-5">
+
+                    <div
+                        class="
+                            mx-auto
+                            mb-4
+                            d-flex
+                            align-items-center
+                            justify-content-center
+                            rounded-circle
+                        "
+                        style="
+                            width: 70px;
+                            height: 70px;
+                            background: #ffe2e5;
+                            font-size: 30px;
+                            color: #c6283d;
+                        "
+                    >
+                        !
+                    </div>
+
+                    <h2 id="member-not-found">
+                        Member Not Found
+                    </h2>
+
+                    <p class="text-muted mt-3">
+                        No member exists with ID
+                        <strong>{{ member_id }}</strong>.
+                    </p>
+
+                    <a
+                        href="/"
+                        class="btn btn-outline-bank mt-3"
+                    >
+                        Back to Search
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

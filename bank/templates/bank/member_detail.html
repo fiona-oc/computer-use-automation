@@ -1,0 +1,140 @@
+{% extends "bank/base.html" %}
+
+{% block title %}
+Member Details
+{% endblock %}
+
+{% block content %}
+
+<section class="hero hero-small">
+
+    <div class="container">
+
+        <p class="mb-2 opacity-75">
+            Members / {{ member_id }}
+        </p>
+
+        <h1>
+            Member Details
+        </h1>
+
+        <p class="mb-0">
+            View member information and manage accounts.
+        </p>
+
+    </div>
+
+</section>
+
+<div class="container">
+
+    <div class="card content-card overlap-card">
+
+        <div class="card-body p-4 p-md-5">
+
+            <div
+                class="d-flex
+                       justify-content-between
+                       align-items-center
+                       flex-wrap
+                       gap-3"
+            >
+
+                <div>
+                    <h2 class="mb-1">
+                        {{ member.name }}
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Member ID: {{ member_id }}
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'open_account' member_id %}"
+                    class="btn btn-bank"
+                    id="open-account-button"
+                >
+                    + Open Sub-account
+                </a>
+
+            </div>
+
+            <hr class="my-4">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Checking Balance
+                        </div>
+
+                        <div class="metric-value">
+                            ${{ member.checking_balance }}
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Savings Balance
+                        </div>
+
+                        <div class="metric-value">
+                            ${{ member.savings_balance }}
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-5">
+
+                <h4>
+                    Member Information
+                </h4>
+
+                <table class="table mt-3">
+
+                    <tbody>
+
+                    <tr>
+                        <th>Full Name</th>
+                        <td>{{ member.name }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Member ID</th>
+                        <td>{{ member_id }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Status</th>
+
+                        <td>
+                            <span class="status-active">
+                                Active
+                            </span>
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
